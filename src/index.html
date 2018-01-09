@@ -1,0 +1,45 @@
+<html>
+
+<head>
+    <title>Blockchain Explorer</title>
+</head>
+
+<body>
+    <table id="blocks" width="100%">
+        <tr>
+            <th>Number</th>
+            <th>Hash</th>
+            <th>Timestamp</th>
+        </tr>
+    </table>
+    <script type="text/javascript" src="https://cdn.ethers.io/scripts/ethers-app-v0.2.min.js"></script>
+    <script>
+        ethers.onready = function () {
+            updateBlocks();
+        };
+
+        function updateBlocks() {
+            var lastBlockNumber = ethers.blockchain.getBlockNumber();
+            lastBlockNumber.then(function (number) {
+                for (var i = 0; i < 10; i++) {
+                    ethers.blockchain.getBlock(number - i).then(function (block) {
+                        printBlock(block);
+                    });
+                }
+            });
+        }
+
+        function printBlock(block) {
+            var table = document.getElementById('blocks');
+            var row = table.insertRow(-1);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+            cell1.innerHTML = block.number;
+            cell2.innerHTML = block.hash;
+            cell3.innerHTML = block.timestamp;
+        }
+    </script>
+</body>
+
+</html>
