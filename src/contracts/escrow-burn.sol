@@ -5,11 +5,13 @@ Simple escrow contract that mediates disputes using a burn contract
 */
 contract Escrow {
 
-    enum State {UNINITIATED, IN_PROGRESS, COMPLETE}
+    enum State {UNINITIATED, AWAITING_PAYMENT, AWAITING_DELIVERY, COMPLETE}
     State public currentState;
 
     modifier inState(State expectedState) { require(currentState == expectedState); _; }
     modifier buyerOnly() { require(msg.sender == buyer); _; }
+    modifier correctPrice() { require(msg.value == price); _; }
+    modifier correctDeposit() { require(msg.value == deposit); _; }
 
     address public buyer;
     address public seller;
@@ -17,27 +19,36 @@ contract Escrow {
     bool public buyer_in;
     bool public seller_in;
 
-    function Escrow(address _buyer, address _seller){
+    uint public price;
+    uint public deposit;
+
+    function Escrow(address _buyer, address _seller, uint _price, uint _deposit){
         buyer = _buyer;
         seller = _seller;
+        price = _price;
+        deposit = _deposit;
     }
 
-    function initiateContract() inState(State.UNINITIATED) payable {
+    function initiateContract() correctDeposit inState(State.UNINITIATED) payable {
         if (msg.sender == buyer) {
             buyer_in = true;
         }
-
         if (msg.sender == seller) {
             seller_in = true;
         }
-
         if (buyer_in && seller_in) {
-            currentState = State.IN_PROGRESS;
+            currentState = State.AWAITING_PAYMENT;
         }
     }
 
+    function confirmPayment() buyerOnly correctPrice inState(State.AWAITING_PAYMENT) payable {
+        currentState = State.AWAITING_DELIVERY;
+    }
+
     function confirmDelivery() buyerOnly inState(State.AWAITING_DELIVERY) {
-        seller.send(this.balance);
+        seller.send(price);
+        seller.send(deposit);
+        buyer.send(deposit)
         currentState = State.COMPLETE;
     }
 }
