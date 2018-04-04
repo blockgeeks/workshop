@@ -11,7 +11,6 @@ contract Escrow {
     modifier inState(State expectedState) { require(currentState == expectedState); _; }
     modifier buyerOnly() { require(msg.sender == buyer); _; }
     modifier correctPrice() { require(msg.value == price); _; }
-    modifier correctDeposit() { require(msg.value == deposit); _; }
 
     address public buyer;
     address public seller;
@@ -20,16 +19,14 @@ contract Escrow {
     bool public seller_in;
 
     uint public price;
-    uint public deposit;
 
-    function Escrow(address _buyer, address _seller, uint _price, uint _deposit){
+    function Escrow(address _buyer, address _seller, uint _price){
         buyer = _buyer;
         seller = _seller;
         price = _price;
-        deposit = _deposit;
     }
 
-    function initiateContract() correctDeposit inState(State.UNINITIATED) payable {
+    function initiateContract() correctPrice inState(State.UNINITIATED) payable {
         if (msg.sender == buyer) {
             buyer_in = true;
         }
@@ -46,9 +43,8 @@ contract Escrow {
     }
 
     function confirmDelivery() buyerOnly inState(State.AWAITING_DELIVERY) {
-        seller.send(price);
-        seller.send(deposit);
-        buyer.send(deposit)
+        seller.send(price * 2);
+        buyer.send(price)
         currentState = State.COMPLETE;
     }
 }
