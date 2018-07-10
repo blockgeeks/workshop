@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <link rel="stylesheet" type="text/text/css" href="main.css">
+
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+  </head>
+
+  <body>
+    <div class="container">
+
+      <h1>Fifa Players</h1>
+
+      <h2 id="player"></h2>
+
+      <label for="name" class="col-lg-2 control-label">Player Name</label>
+      <input id=name type="text">
+
+      <label for="name" class="col-lg-2 control-label">Player Age</label>
+      <input id="age" type="text">
+
+      <button id="button">Update Player</button>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+
+    <script>
+
+      if (typeof web3 != 'undefined') {
+        web3 = new Web3(web3.currentProvider);
+      } else {
+        web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+      }
+
+      web3.eth.defaultAccount = web3.eth.accounts[0];
+
+      var FifaContract = web3.eth.contract(
+          [{
+          		"constant": false,
+          		"inputs": [
+          			{
+          				"name": "name",
+          				"type": "string"
+          			},
+          			{
+          				"name": "age",
+          				"type": "uint256"
+          			}
+          		],
+          		"name": "setPlayer",
+          		"outputs": [],
+          		"payable": false,
+          		"stateMutability": "nonpayable",
+          		"type": "function"
+          	},
+          	{
+          		"constant": true,
+          		"inputs": [],
+          		"name": "getPlayer",
+          		"outputs": [
+          			{
+          				"name": "",
+          				"type": "string"
+          			},
+          			{
+          				"name": "",
+          				"type": "uint256"
+          			}
+          		],
+          		"payable": false,
+          		"stateMutability": "view",
+          		"type": "function"
+          	}
+          ]);
+
+      var Fifa = FifaContract.at("0xb2a1117b8640947b702e5aa193e9f5afbeb55ca0");
+
+      Fifa.getPlayer(function(error, result) {
+        if(!error) {
+          $("#player").html(result[0]+' ('+result[1]+' years old)');
+          console.log(result);
+        } else {
+          console.error(error);
+        }
+
+        $("#button").click(function() {
+          Fifa.setPlayer($("#name").val(), $("#age").val());
+        });
+      });
+
+    </script>
+  </body>
+</html>
