@@ -1,58 +1,63 @@
+<!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <title>Blockchain Explorer</title>
-</head>
-
-<body>
+  </head>
+  <body>
     <table id="blocks" width="100%">
-        <tr>
-            <th>Number</th>
-            <th>Hash</th>
-            <th>Timestamp</th>
-        </tr>
+      <tr>
+        <th>
+          Number
+        </th>
+        <th>
+          Hash
+        </th>
+        <th>
+          Timestamp
+        </th>
+      </tr>
     </table>
-    <script type="text/javascript" src="https://cdn.ethers.io/scripts/ethers-app-v0.2.min.js"></script>
+    <!-- This exposes the library as a global variable ethers -->
+    <script src="https://cdn.ethers.io/scripts/ethers-v3.min.js" charset="utf-8" type="text/javascript"></script>
+
     <script>
-        ethers.onready = function () {
-            updateBlocks();
-            getValue();
-        };
+      provider = ethers.providers.getDefaultProvider();
 
-        function updateBlocks() {
-            var lastBlockNumber = ethers.blockchain.getBlockNumber();
-            lastBlockNumber.then(function (number) {
-                for (var i = 0; i < 10; i++) {
-                    ethers.blockchain.getBlock(number - i).then(function (block) {
-                        printBlock(block);
-                    });
-                }
+      updateBlocks();
+      getValue();
+
+      function updateBlocks() {
+        var lastBlockNumber = provider.getBlockNumber().then(function(blockNumber) {
+          for (var i = 0; i < 10; i++) {
+            provider.getBlock(blockNumber - i).then(function(block) {
+              printBlock(block)
             });
-        }
+          }
+        });
+      }
 
-        function printBlock(block) {
-            var table = document.getElementById('blocks');
-            var row = table.insertRow(-1);
-            var cell1 = row.insertCell(0);
-            var cell2 = row.insertCell(1);
-            var cell3 = row.insertCell(2);
-            cell1.innerHTML = block.number;
-            cell2.innerHTML = block.hash;
-            cell3.innerHTML = block.timestamp;
-        }
+      function printBlock(block) {
+        var table = document.getElementById('blocks');
+        var row = table.insertRow(-1);
+        var cell1 = row.insertCell(0);
+        var cell2 = row.insertCell(1);
+        var cell3 = row.insertCell(2);
+        cell1.innerHTML = block.number;
+        cell2.innerHTML = block.hash;
+        cell3.innerHTML = block.timestamp;
+      }
 
-        function getValue() {
-            var contractAddress = "0x954De93D9f1Cd1e2e3AE5964F614CDcc821Fac64";
-            var contractABI = [{"constant":true,"inputs":[],"name":"getValue","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":false,"inputs":[{"name":"value","type":"string"}],"name":"setValue","outputs":[],"type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"oldValue","type":"string"},{"indexed":false,"name":"newValue","type":"string"}],"name":"valueChanged","type":"event"}];
+      function getValue() {
+        var contractAddress = "0x954De93D9f1Cd1e2e3AE5964F614CDcc821Fac64";
+        var contractABI = [{"constant":true,"inputs":[],"name":"getValue","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":false,"inputs":[{"name":"value","type":"string"}],"name":"setValue","outputs":[],"type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"oldValue","type":"string"},{"indexed":false,"name":"newValue","type":"string"}],"name":"valueChanged","type":"event"}]
 
-            var contract = ethers.getContract(contractAddress, contractABI);
+        var contract = new ethers.Contract(contractAddress, contractABI, provider);
 
-            contract.getValue().then(function(result) {
-                console.log("getValue() returned " + result[0]);
-            })
-        }
+        contract.getValue().then(function(result) {
+          console.log("getValue() returned " + result);
+        });
+      }
 
     </script>
-</body>
-
+  </body>
 </html>
