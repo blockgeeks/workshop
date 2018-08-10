@@ -30,7 +30,7 @@ contract Election {
         _;
     }
 
-    function Election(string _name) public {
+    constructor(string _name) public {
         owner = msg.sender;
         electionName = _name;
     }
@@ -59,7 +59,7 @@ contract Election {
     function end() ownerOnly public {
         //announce each candidates results
         for(uint i=0; i < candidates.length; i++) {
-            ElectionResult(candidates[i].name, candidates[i].voteCount);
+            emit ElectionResult(candidates[i].name, candidates[i].voteCount);
         }
 
         //destroy the contract
