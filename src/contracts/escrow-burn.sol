@@ -3,6 +3,7 @@ pragma solidity ^0.4.21;
 /*
 Simple escrow contract that mediates disputes using a burn contract
 */
+
 contract Escrow {
 
     enum State {UNINITIATED, AWAITING_PAYMENT, AWAITING_DELIVERY, COMPLETE}
@@ -20,7 +21,7 @@ contract Escrow {
 
     uint public price;
 
-    function Escrow(address _buyer, address _seller, uint _price){
+    constructor(address _buyer, address _seller, uint _price){
         buyer = _buyer;
         seller = _seller;
         price = _price;
@@ -43,8 +44,8 @@ contract Escrow {
     }
 
     function confirmDelivery() buyerOnly inState(State.AWAITING_DELIVERY) {
-        buyer.send(price);
-        seller.send(price * 2);
+        buyer.transfer(price);
+        seller.transfer(price * 2);
         currentState = State.COMPLETE;
     }
 }
