@@ -43,8 +43,8 @@ contract Escrow {
     }
 
     function confirmDelivery() buyerOnly inState(State.AWAITING_DELIVERY) {
+        buyer.send(price);
         seller.send(price * 2);
-        buyer.send(price)
         currentState = State.COMPLETE;
     }
 }
