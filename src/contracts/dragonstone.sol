@@ -1,28 +1,25 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.4.25;
 
-/*
-Currency that can only be issued by its creator and transferred to anyone
-*/
 contract DragonStone {
+
     address public creator;
     mapping (address => uint) public balances;
 
-    // event that notifies when a transfer has completed
-    event Delivered(address from, address to, uint amount);
+    event Transfered(address from, address to, uint amount);
 
     constructor() public {
         creator = msg.sender;
     }
 
     function create(address receiver, uint amount) public {
-        if (msg.sender != creator) return;
+        require(msg.sender == creator);
         balances[receiver] += amount;
     }
 
     function transfer(address receiver, uint amount) public {
-        if (balances[msg.sender] < amount) return;
+        require(balances[msg.sender] > amount);
         balances[msg.sender] -= amount;
         balances[receiver] += amount;
-        emit Delivered(msg.sender, receiver, amount);
+        emit Transfered(msg.sender, receiver, amount);
     }
 }
